@@ -98,6 +98,5 @@ const saveFile = async (event, message, data) => {
 }
 
 module.exports = async (event, message) => {
-  const data = JSON.parse(event.body);
-  await saveFile(event, message, data);
+  await saveFile(event, message, event.body);
 };

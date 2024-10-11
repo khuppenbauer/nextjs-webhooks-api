@@ -5,13 +5,20 @@ const features = require('../../methods/features');
 const cloudinary = require('../../libs/cloudinary');
 
 export default async function handler(req, res) {
-  if (req.method === 'POST') {
+  const { headers, method, url, query, body } = req;
+  const event = {
+    headers,
+    httpMethod: method, 
+    path: url,
+    queryStringParameters: query,
+    body
+  };
+  if (method === 'POST') {
     const message = 'upload_cloudinary_image';
-    const data = req.body;
-    const { folder, source } = data;
+    const { folder, source } = body;
     const { foreignKey } = source;
-    const res = await cloudinary.upload(data);
-    const { secure_url: url } = res;
+    const result = await cloudinary.upload(body);
+    const { secure_url: url } = result;
     const filter = { name: foreignKey };
     const track = await Track.findOne(filter);
     const { _id: trackId } = track;
@@ -30,15 +37,15 @@ export default async function handler(req, res) {
         ...update,
       };
       const featureObject = {
-        ...req,
-        body: JSON.stringify({ ...feature._doc, meta }),
+        ...event,
+        body: { ...feature._doc, meta },
       };
       await features.update(featureObject, _id);
     }
-    if (res) {
+    if (result) {
       const messageObject = {
-        ...req,
-        body: JSON.stringify(res),
+        ...event,
+        body: result,
       };
       await messages.create(messageObject, { foreignKey, app: 'messageQueue', event: message });
     }

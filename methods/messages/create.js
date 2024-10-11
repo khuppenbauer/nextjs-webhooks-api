@@ -23,7 +23,7 @@ module.exports = async (event, data) => {
       status: 'pending',
       headers: headers(event.headers),
       queryStringParameters: event.queryStringParameters,
-      body: JSON.parse(event.body),
+      body: event.body,
     };
     await Message.create(result);
   } catch (err) {

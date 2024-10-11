@@ -99,8 +99,7 @@ const processActivity = async (event, foreignKey) => {
 }
 
 module.exports = async (event, message) => {
-  const data = JSON.parse(event.body);
-  const { object_id: foreignKey } = data;
+  const { object_id: foreignKey } = event.body;
   const activityData = await processActivity(event, foreignKey);
   await messages.create(event, { foreignKey, app: 'strava', event: message });
   return activityData;

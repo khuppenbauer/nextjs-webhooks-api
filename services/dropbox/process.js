@@ -16,7 +16,7 @@ const processEntries = async (event, message, entries) => {
     } else if (tag === 'file') {
       const messageObject = {
         ...event,
-        body: JSON.stringify(entry),
+        body: entry,
       };
       const messageData = {
         foreignKey: path_display,
@@ -33,6 +33,5 @@ const processEntries = async (event, message, entries) => {
 };
 
 module.exports = async (event, message) => {
-  const entries = JSON.parse(event.body);
-  await processEntries(event, message, entries);
+  await processEntries(event, message, event.body);
 };

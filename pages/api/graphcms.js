@@ -4,17 +4,25 @@ const Track = require('../../models/track');
 const Feature = require('../../models/feature');
 
 export default async function handler(req, res) {
-  if (req.method === 'POST') {
-    const { type, action } = req.query;
-    const data = req.body;
+  const { headers, method, url, query, body } = req;
+  const event = {
+    headers,
+    httpMethod: method, 
+    path: url,
+    queryStringParameters: query,
+    body
+  };
+  if (method === 'POST') {
+    const { type, action } = query;
+    const data = body;
     let message;
-    let res;
+    let result;
     if (type === 'track') {
       message = `${action}_track`;
-      res = await graphcms.track(req, data, action);
+      result = await graphcms.track(event, data, action);
     } else if (type === 'file') {
-      res = await graphcms.asset(req, data);
-      const { folder, extension, source, url, name } = res;
+      result = await graphcms.asset(event, data);
+      const { folder, extension, source, url, name } = result;
       const dir = folder.replace('/', '');
       const { foreignKey } = source;
       const filter = { name: foreignKey };
@@ -28,10 +36,10 @@ export default async function handler(req, res) {
           };
           await Feature.findByIdAndUpdate(_id, { meta } );
           const messageObject = {
-            ...req,
-            body: JSON.stringify({
+            ...event,
+            body: {
               _id,
-            }),
+            },
           };
           await messages.create(messageObject, { foreignKey: data.path_display, app: 'graphcms', event: 'update_image_image_feature' });
         }
@@ -50,15 +58,15 @@ export default async function handler(req, res) {
       message = `upload_${dir}_${extension}_file`;
     } else if (type === 'segment') {
       message = 'add_segment';
-      res = await graphcms.trail(req, data);
+      result = await graphcms.trail(event, data);
     } else if (type === 'collection') {
       message = 'update_collection';
-      res = await graphcms.collection(req, data);
+      result = await graphcms.collection(event, data);
     }
-    if (res) {
+    if (result) {
       const messageObject = {
-        ...req,
-        body: JSON.stringify(res),
+        ...event,
+        body: result,
       };
       await messages.create(messageObject, { foreignKey: data.path_display, app: 'graphcms', event: message });
     }

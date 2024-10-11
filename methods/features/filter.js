@@ -4,9 +4,8 @@ const Feature = require('../../models/feature');
 
 const filteredResult = async (event) => {
   let result;
-  const filter = JSON.parse(event.body);
   try {
-    result = await Feature.find(filter);
+    result = await Feature.find(event.body);
   } catch (err) {
     return {
       statusCode: 400,

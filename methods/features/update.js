@@ -5,15 +5,14 @@ const Message = require('../../models/message');
 const messages = require('../messages');
 
 module.exports = async (event, id) => {
-  const { body } = event;
-  const feature = JSON.parse(body);
+  const { body: feature } = event;
   const { foreignKey, source, type } = feature;
 
   try {
     await Feature.findByIdAndUpdate(id, feature);
     const messageObject = {
       ...event,
-      body: JSON.stringify({ _id: id }),
+      body: { _id: id },
     };
     const messageData = {
       foreignKey,

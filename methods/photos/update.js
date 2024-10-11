@@ -3,8 +3,7 @@ const db = require('../../database/mongodb');
 const Photo = require('../../models/photo');
 
 module.exports = async (event, id) => {
-  const { body } = event;
-  const photo = JSON.parse(body);
+  const { body: photo } = event;
   try {
     await Photo.findByIdAndUpdate(id, photo);
   } catch (err) {

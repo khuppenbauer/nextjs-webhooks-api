@@ -6,10 +6,17 @@ const filesLib = require('../../libs/files');
 const coordinatesLib = require('../../libs/coordinates');
 
 export default async function handler(req, res) {
-  if (req.method === 'POST') {
+  const { headers, method, url, query, body } = req;
+  const event = {
+    headers,
+    httpMethod: method, 
+    path: url,
+    queryStringParameters: query,
+    body
+  };
+  if (method === 'POST') {
     const message = 'update_file';
-    const data = req.body
-    const record = await File.findById(data._id);
+    const record = await File.findById(body._id);
     const {
       dateTimeOriginal,
       path_display: pathDisplay,
@@ -24,11 +31,11 @@ export default async function handler(req, res) {
         };
         await File.findByIdAndUpdate(id, { coords });
         const messageObject = {
-          ...req,
-          body: JSON.stringify({ _id: id, path_display: pathDisplay }),
+          ...event,
+          body: { _id: id, path_display: pathDisplay },
         };
         await messages.create(messageObject, { foreignKey: pathDisplay, app: 'messageQueue', event: message });
-        await filesLib.feature(req, data, coordinate);
+        await filesLib.feature(event, body, coordinate);
       }
     }
     res.statusCode = 200;

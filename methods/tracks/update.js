@@ -3,8 +3,7 @@ const db = require('../../database/mongodb');
 const Track = require('../../models/track');
 
 module.exports = async (event, id) => {
-  const { body } = event;
-  const track = JSON.parse(body);
+  const { body: track } = event;
   try {
     await Track.findByIdAndUpdate(id, track);
   } catch (err) {

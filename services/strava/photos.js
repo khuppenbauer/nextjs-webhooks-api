@@ -34,8 +34,7 @@ const processPhotos = async (event, foreignKey, dropboxSync) => {
 }
 
 module.exports = async (event, message, dropboxSync) => {
-  const data = JSON.parse(event.body);
-  const { object_id: foreignKey } = data;
+  const { object_id: foreignKey } = event.body;
   await processPhotos(event, foreignKey, dropboxSync);
   await messages.create(event, { foreignKey, app: 'strava', event: message });
 };

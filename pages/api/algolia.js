@@ -1,10 +1,10 @@
 const algolia = require('../../libs/algolia');
 
 export default async function handler(req, res) {
-  if (req.method === 'POST') {
-    const { type } = req.query;
-    const data = req.body;
-    const { _id } = data;
+  const { method, query, body } = req;
+  if (method === 'POST') {
+    const { type } = query;
+    const { _id } = body;
     if (type === 'feature') {
       await algolia.feature(_id);
     } else if (type === 'track') {

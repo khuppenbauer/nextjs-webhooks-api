@@ -3,7 +3,7 @@ const db = require('../../database/mongodb');
 const Subscription = require('../../models/subscription');
 
 module.exports = async (event) => {
-  const data = JSON.parse(event.body);
+  const { body: data } = event;
   const subscription = {
     ...data,
     _id: mongoose.Types.ObjectId(),

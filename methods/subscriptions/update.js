@@ -3,8 +3,7 @@ const db = require('../../database/mongodb');
 const Subscription = require('../../models/subscription');
 
 module.exports = async (event, id) => {
-  const { body } = event;
-  const subscription = JSON.parse(body);
+  const { body: subscription }  = event;
   if (id) {
     try {
       await Subscription.findByIdAndUpdate(id, subscription);

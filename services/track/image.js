@@ -47,8 +47,7 @@ const getGeoJson = async (gpxFile) => {
 };
 
 const processImage = async (url, event, message, folder) => {
-  const body = JSON.parse(event.body);
-  const { name } = body;
+  const { name } = event.body;
   const data = await axios
     .get(url, {
       responseType: 'arraybuffer',
@@ -74,8 +73,7 @@ const processImage = async (url, event, message, folder) => {
 };
 
 module.exports = async (event, message) => {
-  const body = JSON.parse(event.body);
-  const { track, url } = body;
+  const { track, url } = event.body;
   const geoJson = await getGeoJson(url);
   const geoJsonFeature = geoJson.features
     .filter((feature) => feature.geometry.type === 'LineString')

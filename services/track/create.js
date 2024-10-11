@@ -122,7 +122,7 @@ const parseFeatures = async (geoJsonFeatures) => {
 };
 
 module.exports = async (event, message) => {
-  const data = event.body;
+  const { body: data } = event;
   const { path_display: pathDisplay, url } = data;
   const { name } = path.parse(pathDisplay);
   const geoJsonData = await coordinatesLib.toGeoJson(await (await axios.get(url)).data, 'track');
@@ -155,13 +155,13 @@ module.exports = async (event, message) => {
   }
   const messageObject = {
     ...event,
-    body: JSON.stringify({
+    body: {
       ...trackObject._doc,
       name,
       gpxFile: pathDisplay,
       track: trackId,
       url,
-    }),
+    },
   };
   await messages.create(messageObject, {
     foreignKey: trackId,

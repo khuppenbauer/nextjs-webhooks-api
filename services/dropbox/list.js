@@ -77,8 +77,7 @@ const executeChanges = async (event, account) => {
 };
 
 module.exports = async (event) => {
-  const data = JSON.parse(event.body);
-  const { list_folder: listFolder } = data;
+  const { list_folder: listFolder } = event.body;
   const { accounts } = listFolder;
   return accounts.reduce(async (lastPromise, account) => {
     const accum = await lastPromise;

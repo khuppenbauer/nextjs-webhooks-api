@@ -4,8 +4,7 @@ const featureService = require('../../services/feature');
 const coordinatesLib = require('../../libs/coordinates');
 
 const parseData = async (event) => {
-  const body = event.body;
-  const { url } = body;
+  const { url } = event.body;
   const { name } = path.parse(url);
   const geoJson = await coordinatesLib.toGeoJson(await (await axios.get(url)).data, name);
   await geoJson.features.reduce(async (lastPromise, feature) => {
@@ -22,8 +21,16 @@ const parseData = async (event) => {
 };
 
 export default async function handler(req, res) {
-  if (req.method === 'POST') {
-    await parseData(req);
+  const { headers, method, url, query, body } = req;
+  const event = {
+    headers,
+    httpMethod: method, 
+    path: url,
+    queryStringParameters: query,
+    body
+  };
+  if (method === 'POST') {
+    await parseData(event);
     res.statusCode = 200;
     res.send('Ok')
   }

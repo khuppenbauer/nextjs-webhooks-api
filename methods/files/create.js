@@ -25,10 +25,10 @@ module.exports = async (event, metaData, message) => {
   if (message) {
     const messageObject = {
       ...event,
-      body: JSON.stringify({
+      body: {
         ...res._doc,
         ...metaData,
-      }),
+      },
     };
     const eventPostfix = `${metaData.folder.replace('/', '').replace('/', '_')}`;
     const messageData = {
@@ -36,7 +36,6 @@ module.exports = async (event, metaData, message) => {
       app: 'messageQueue',
       event: `${message}_${eventPostfix}`,
     };
-    console.log(messageData);
     const existingMessage = await Message.find(messageData);
     if (existingMessage.length === 0) {
       await messages.create(messageObject, messageData);

@@ -25,7 +25,7 @@ module.exports = async (event, data) => {
     await Feature.create(feature);
     const messageObject = {
       ...event,
-      body: JSON.stringify({ _id: id }),
+      body: { _id: id },
     };
     const messageData = {
       foreignKey,

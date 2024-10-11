@@ -205,9 +205,9 @@ const updateTrack = async (event, data) => {
   await messages.create(
     {
       ...event,
-      body: JSON.stringify({
+      body: {
         _id: foreignKey,
-      }),
+      },
     },
     {
       foreignKey,
@@ -260,9 +260,9 @@ const updateTrack = async (event, data) => {
   await messages.create(
     {
       ...event,
-      body: JSON.stringify({
+      body: {
         _id
-      }),
+      },
     },
     {
       foreignKey: _id,

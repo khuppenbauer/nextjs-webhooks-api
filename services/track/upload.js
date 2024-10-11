@@ -92,7 +92,7 @@ const createFeature = async (event, track, geoJson) => {
 };
 
 module.exports = async (event, message) => {
-  const { event: data, content } = JSON.parse(event.body);
+  const { event: data, content } = event.body;
   const { body, params } = data;
   const { outtype } = params;
   const count = params.count || '';
@@ -146,10 +146,10 @@ module.exports = async (event, message) => {
   const trackObject = await Track.findByIdAndUpdate(track, trackData);
   const messageObject = {
     ...event,
-    body: JSON.stringify({
+    body: {
       ...trackObject._doc,
       ...body,
-    }),
+    },
   };
   await messages.create(messageObject, { foreignKey: track, app: 'messageQueue', event: message });
   await files.create(event, metaData);

@@ -10,7 +10,7 @@ const processEntries = async (event, message, entries) => {
     if (tag === 'file') {
       const messageObject = {
         ...event,
-        body: JSON.stringify(entry),
+        body: entry,
       };
       await dropbox.sync(messageObject, message);
     }
@@ -19,11 +19,19 @@ const processEntries = async (event, message, entries) => {
 };
 
 export default async function handler(req, res) {
-  if (req.method === 'POST') {
+  const { headers, method, url, query, body } = req;
+  const event = {
+    headers,
+    httpMethod: method, 
+    path: url,
+    queryStringParameters: query,
+    body
+  };
+  if (method === 'POST') {
     const syncMessage = 'create_file';
-    const entries = await dropbox.list(req);
+    const entries = await dropbox.list(event);
     const entriesObject = JSON.parse(JSON.stringify(entries[0]).replace(/\.tag/gi, 'tag'));
-    await processEntries(req, syncMessage, entriesObject);
+    await processEntries(event, syncMessage, entriesObject);
     res.statusCode = 200;
     res.send('Ok')
   }

@@ -3,8 +3,7 @@ const db = require('../../database/mongodb');
 const Message = require('../../models/message');
 
 module.exports = async (event, id) => {
-  const { body } = event;
-  const message = JSON.parse(body);
+  const { body: message } = event;
   try {
     await Message.findByIdAndUpdate(id, message);
   } catch (err) {

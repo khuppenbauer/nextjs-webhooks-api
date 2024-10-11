@@ -182,9 +182,9 @@ const removeTracks = async (event, tracks) => {
     await messages.create(
       {
         ...event,
-        body: JSON.stringify({
+        body: {
           _id: foreignKey,
-        }),
+        },
       },
       {
         foreignKey,
@@ -219,9 +219,9 @@ const updateTracks = async (event, tracks) => {
     await messages.create(
       {
         ...event,
-        body: JSON.stringify({
+        body: {
           _id: foreignKey,
-        }),
+        },
       },
       {
         foreignKey,

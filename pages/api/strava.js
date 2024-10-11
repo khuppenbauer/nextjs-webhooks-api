@@ -19,7 +19,7 @@ const processSegments = async (event, message, segmentEfforts, parseSegments, sa
         };
         const messageObject = {
           ...event,
-          body: JSON.stringify(segment),
+          body: segment,
         };
         await messages.create(messageObject, messageData);
       }
@@ -29,27 +29,35 @@ const processSegments = async (event, message, segmentEfforts, parseSegments, sa
 };
 
 export default async function handler(req, res) {
-  if (req.method === 'POST') {
+  const { headers, method, url, query, body } = req;
+  const event = {
+    headers,
+    httpMethod: method, 
+    path: url,
+    queryStringParameters: query,
+    body
+  };
+  if (method === 'POST') {
     const {
       action, includeSegments, parseSegments, saveSegmentsGpx, dropboxSync,
-    } = req.query;
+    } = query;
     if (action === 'activity') {
       const message = 'save_activity';
-      const activityData = await strava.activity(req, message);
+      const activityData = await strava.activity(event, message);
       if (includeSegments === 'true') {
         const { segment_efforts: segmentEfforts } = activityData;
-        await processSegments(req, 'parse_segments', segmentEfforts, parseSegments, saveSegmentsGpx);
+        await processSegments(event, 'parse_segments', segmentEfforts, parseSegments, saveSegmentsGpx);
       }
       if (dropboxSync === 'true') {
-        await strava.photos(req, 'save_photos', dropboxSync);
+        await strava.photos(event, 'save_photos', dropboxSync);
       }
     } else if (action === 'photos') {
-      await strava.photos(req, 'save_photos', dropboxSync);
+      await strava.photos(event, 'save_photos', dropboxSync);
     } else if (action === 'create') {
-      await strava.create(req, 'create_activity');
+      await strava.create(event, 'create_activity');
     } else if (action === 'segment') {
-      const segment = req.body;
-      await strava.segment(req, segment, saveSegmentsGpx);
+      const segment = body;
+      await strava.segment(event, segment, saveSegmentsGpx);
     }
     res.statusCode = 200;
     res.send('Ok')
