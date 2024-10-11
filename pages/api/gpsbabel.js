@@ -73,22 +73,56 @@ const readFile = async (fileName, inFileType, outType) => {
   return data;
 };
 
-export default async function gpsbabel(req, res) {
-  const fileName = `/tmp/${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`;
-  const { query } = req;
-  const url = new URL(query.infile);
-  const inFileType = await saveFile(await (await axios.get(url.href)).data, fileName);
-  const extension = url.pathname.split('.').pop();
-  const inType = query.intype || fileTypeMapping[extension];
-  const outType = query.outtype;
-  const { count, distance, error } = query;
-  const outFile = await convertFile(inType, fileName, inFileType, outType, count, distance, error);
-
-  if (outFile === false) {
-    res.statusCode = 405;
-    res.send('Error when converting file')
+export default async function handler(req, res) {
+  const { headers, method, url, query: params, body } = req;
+  const event = {
+    headers,
+    httpMethod: method, 
+    path: url,
+    queryStringParameters: params,
+    body
+  };
+  let inFile;
+  let inFileType;
+  let inType;
+  if (method === 'GET' || method === 'POST') {
+    const fileName = `/tmp/${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`;
+    if (method === 'GET') {
+      inFile = params.infile;
+    } else if (method === 'POST') {
+      inFile = body.url;
+    }
+    if (inFile) {
+      const url = new URL(inFile);
+      inFileType = await saveFile(await (await axios.get(url.href)).data, fileName);
+      const extension = url.pathname.split('.').pop();
+      inType = params.intype || fileTypeMapping[extension];
+    }
+    const { outtype: outType, count, distance, error, webhook: webHook } = params;
+    const outFile = await convertFile(inType, fileName, inFileType, outType, count, distance, error);
+    if (outFile === false) {
+      return {
+        statusCode: 405,
+        body: 'Error when converting file',
+      };
+    }
+    const data = await readFile(fileName, inFileType, outType);
+    const messageData = {
+      app: 'gpsbabel',
+      event: `convert_${inType}_${outType}`,
+      foreignKey: inFile ? inFile : fileName,
+      data: {
+        event: {
+          body,
+          params,
+        },
+        content: data,
+      },
+    }
+    await axios.post(webHook, messageData);
+    res.statusCode = 200;
+    res.send('Ok');
   }
-  const data = await readFile(fileName, inFileType, outType);
-  res.statusCode = 200;
-  res.json(JSON.parse(data))
-}
+  res.statusCode = 405;
+  res.send('Error when converting file')
+};
