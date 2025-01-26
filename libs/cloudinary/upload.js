@@ -36,7 +36,9 @@ module.exports = async (data) => {
   }
   const res = await cloudinary.uploader.upload(upload,
     {
+      resource_type: 'auto',
       public_id: publicId,
+      format: extension,
     }
   );
   const { secure_url: secureUrl } = res;
