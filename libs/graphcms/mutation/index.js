@@ -3,6 +3,7 @@ const UpdateAsset = require('./updateAsset');
 const DeleteAsset = require('./deleteAsset');
 const PublishTrack = require('./publishTrack');
 const UpdateTrack = require('./updateTrack');
+const UpdateTrackAddImage = require('./updateTrackAddImage');
 const UpdateCollection = require('./updateCollection');
 const UpdateCollectionConnectAsset = require('./updateCollectionConnectAsset');
 const PublishCollection = require('./publishCollection');
@@ -18,6 +19,7 @@ module.exports = {
   deleteAsset: DeleteAsset,
   publishTrack: PublishTrack,
   updateTrack: UpdateTrack,
+  UpdateTrackAddImage: UpdateTrackAddImage,
   updateCollection: UpdateCollection,
   updateCollectionConnectAsset: UpdateCollectionConnectAsset,
   publishCollection: PublishCollection,

@@ -127,6 +127,9 @@ const schema = new mongoose.Schema({
   endTime: {
     type: Date,
   },
+  images: {
+    type: Object,
+  },
 }, schemaOptions);
 const Track = mongoose.model('track', schema);
 

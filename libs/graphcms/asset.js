@@ -6,10 +6,12 @@ const fs = require('fs');
 const FormData = require('form-data');
 const db = require('../../database/mongodb');
 const File = require('../../models/file');
+const Track = require('../../models/track');
 const mongodb = require('../mongodb');
 const dropboxLib = require('../dropbox');
 const graphcmsMutation = require('./mutation');
 const graphcmsQuery = require('./query');
+const cloudinary = require('../cloudinary');
 
 const url = process.env.GRAPHCMS_API_URL;
 const token = process.env.GRAPHCMS_API_TOKEN;
@@ -144,8 +146,41 @@ const publishAsset = async (asset, record) => {
   return graphcms.request(mutation, mutationVariables);
 };
 
+const getTracks = async (record) => {
+  const { dateTimeOriginal, coords } = record;
+  let tracks;
+  if (dateTimeOriginal) {
+    tracks = await mongodb.trackByDate(dateTimeOriginal);
+  } else if (coords) {
+    const { lat, lon } = coords;
+    const geometry = { type: 'Point', coordinates: [lon, lat] };
+    tracks = await mongodb.trackByCoords(geometry);
+  }
+  return tracks;
+}
+
+const addImageToTrack = async (image, record) => {
+  const tracks = await getTracks(record);
+  if (tracks && tracks.length > 0) {
+    await tracks.reduce(async (lastPromise, track) => {
+      const accum = await lastPromise;
+      const images = track.images || [];
+      const { name } = track;
+      images.push(image);
+      await Track.findOneAndUpdate({ name }, { images });
+      const mutation = await graphcmsMutation.UpdateTrackAddImage();
+      const mutationVariables = {
+        name,
+        images
+      };
+      await graphcms.request(mutation, mutationVariables);
+      return [...accum];
+    }, Promise.resolve([]));
+  }
+}
+
 const updateTrack = async (asset, record, mutation, variable) => {
-  const { source, dateTimeOriginal, coords } = record;
+  const { source } = record;
   if (source) {
     const { foreignKey } = source;
     if (foreignKey) {
@@ -156,14 +191,7 @@ const updateTrack = async (asset, record, mutation, variable) => {
       await graphcms.request(mutation, mutationVariables);
     }
   }
-  let tracks;
-  if (dateTimeOriginal) {
-    tracks = await mongodb.trackByDate(dateTimeOriginal);
-  } else if (coords) {
-    const { lat, lon } = coords;
-    const geometry = { type: 'Point', coordinates: [lon, lat] };
-    tracks = await mongodb.trackByCoords(geometry);
-  }
+  const tracks = getTracks(record);
   if (tracks && tracks.length > 0) {
     await tracks.reduce(async (lastPromise, track) => {
       const accum = await lastPromise;
@@ -210,7 +238,20 @@ module.exports = async (event, data) => {
     source,
   } = record;
   const asset = await uploadAsset(record);
-  const { id: assetId, url: assetUrl, handle } = asset;
+  const { id: assetId, handle } = asset;
+  let assetUrl = asset.url;
+  let image;
+  let mutation;
+  let mutationVariables;
+
+  if (coords) {
+    image = await cloudinary.update(record);
+    assetUrl = image.secure_url;
+  } else {
+    image = await cloudinary.upload(data);
+    assetUrl = image.secure_url;
+  }
+
   let fileUrl;
   if (assetUrl) {
     fileUrl = assetUrl;
@@ -218,10 +259,11 @@ module.exports = async (event, data) => {
     fileUrl = `${assetBaseUrl}/${handle}`;
   }
   await File.findByIdAndUpdate(file, { url: fileUrl, status: 'deployed' });
+  if (coords && image) {
+    await addImageToTrack(image, record);
+  }
   if (assetId) {
     const { updateAsset: res } = await updateAsset(assetId, record);
-    let mutation;
-    let mutationVariables;
     if (folder === '/images') {
       if (coords) {
         if (hasTrails) {
