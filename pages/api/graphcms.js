@@ -1,5 +1,6 @@
 const messages = require('../../methods/messages');
 const graphcms = require('../../libs/graphcms');
+const cloudinary = require('../../libs/cloudinary');
 const Track = require('../../models/track');
 const Feature = require('../../models/feature');
 
@@ -21,7 +22,7 @@ export default async function handler(req, res) {
       message = `${action}_track`;
       result = await graphcms.track(event, data, action);
     } else if (type === 'file') {
-      result = await graphcms.asset(event, data);
+      result = await cloudinary.asset(event, data);
       const { folder, extension, source, url, name } = result;
       const dir = folder.replace('/', '');
       const { foreignKey } = source;
