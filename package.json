@@ -11,7 +11,7 @@
     "algoliasearch": "^4.11.0",
     "axios": "^1.7.7",
     "child-process-promise": "^2.2.1",
-    "cloudinary": "^1.23.0",
+    "cloudinary": "^2.7.0",
     "dayjs": "^1.9.6",
     "dotenv": "^8.2.0",
     "exifr": "^6.0.0",
