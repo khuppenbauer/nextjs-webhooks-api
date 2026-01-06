@@ -35,18 +35,15 @@ if (cdnUrl && cdnToken) {
 }
 
 const addTrack = async (record) => {
+  delete record.geoJson.features[0].properties.coordTimes;
+  delete record.geoJson.features[0].properties.coordinateProperties;
   const {
     minCoords,
     maxCoords,
     startCoords,
     endCoords,
     name,
-    _id: foreignKey,
-    gpxFileUrl,
-    gpxFileSmallUrl,
-    geoJsonFileUrl,
-    overviewImageUrl,
-    previewImageUrl,
+    _id: foreignKey
   } = record;
   const query = await graphcmsQuery.getAssets('fileName_starts_with');
   const queryVariables = {
@@ -56,26 +53,21 @@ const addTrack = async (record) => {
   const mutationVariables = {
     ...record._doc,
     minCoords: {
-      latitude: minCoords.lat,
-      longitude: minCoords.lon,
+      latitude: minCoords.lat || minCoords.latitude,
+      longitude: minCoords.lon || minCoords.longitude,
     },
     maxCoords: {
-      latitude: maxCoords.lat,
-      longitude: maxCoords.lon,
+      latitude: maxCoords.lat || maxCoords.latitude,
+      longitude: maxCoords.lon || maxCoords.longitude,
     },
     startCoords: {
-      latitude: startCoords.lat,
-      longitude: startCoords.lon,
+      latitude: startCoords.lat || startCoords.latitude,
+      longitude: startCoords.lon || startCoords.longitude,
     },
     endCoords: {
-      latitude: endCoords.lat,
-      longitude: endCoords.lon,
+      latitude: endCoords.lat || endCoords.latitude,
+      longitude: endCoords.lon || endCoords.longitude,
     },
-    gpxFileUrl,
-    gpxFileSmallUrl,
-    geoJsonFileUrl,
-    overviewImageUrl,
-    previewImageUrl,
     foreignKey,
   };
   return graphcms.request(mutation, mutationVariables);
