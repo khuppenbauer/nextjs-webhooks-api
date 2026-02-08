@@ -1,5 +1,6 @@
 const dotenv = require('dotenv').config();
-const messages = require('../../methods/messages');
+const dayjs = require('dayjs');
+const tasks = require('../../methods/tasks');
 const logs = require('../../methods/logs');
 
 export default async function handler(req, res) {
@@ -40,7 +41,7 @@ export default async function handler(req, res) {
   if (method === 'POST') {
     const { object_id: foreignKey, aspect_type: aspectType, object_type: objectType } = body;
     await logs.create(event, { startTime, status: 200 });
-    const result = await messages.create(event, { foreignKey, app: 'strava', event: `${aspectType}_${objectType}` });
+    const result = await tasks.create(event, { foreignKey, app: 'strava', event: `${aspectType}_${objectType}`, executionTime: dayjs().add(10, 'minute').format() });
     res.statusCode = result.statusCode;
     res.headers = new Headers(result.headers);
     res.send(result.body);
