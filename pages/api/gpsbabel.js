@@ -107,21 +107,24 @@ export default async function handler(req, res) {
       };
     }
     const data = await readFile(fileName, inFileType, outType);
-    const messageData = {
-      app: 'gpsbabel',
-      event: `convert_${inType}_${outType}`,
-      foreignKey: inFile ? inFile : fileName,
-      data: {
-        event: {
-          body,
-          params,
+    if (webHook) {
+      const messageData = {
+        app: 'gpsbabel',
+        event: `convert_${inType}_${outType}`,
+        foreignKey: inFile ? inFile : fileName,
+        data: {
+          event: {
+            body,
+            params,
+          },
+          content: data,
         },
-        content: data,
-      },
+      }
+      await axios.post(webHook, messageData);
     }
-    await axios.post(webHook, messageData);
+
     res.statusCode = 200;
-    res.send('Ok');
+    res.send(data);
   }
   res.statusCode = 405;
   res.send('Error when converting file')
