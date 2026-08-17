@@ -7,8 +7,7 @@ const DB_URL = process.env.MONGO_DB_URL;
 const DB_NAME = process.env.MONGO_DB_NAME;
 const DB_OPTIONS = {
   useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useFindAndModify: false,
+  useUnifiedTopology: true
 };
 
 // Set DB from mongoose connection
