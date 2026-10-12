@@ -41,7 +41,7 @@ export default async function handler(req, res) {
   if (method === 'POST') {
     const { object_id: foreignKey, aspect_type: aspectType, object_type: objectType } = body;
     await logs.create(event, { startTime, status: 200 });
-    const result = await tasks.create(event, { foreignKey, app: 'strava', event: `${aspectType}_${objectType}`, executionTime: dayjs().add(1, 'minute').format() });
+    const result = await tasks.create(event, { foreignKey, app: 'strava', event: `${aspectType}_${objectType}`, executionTime: dayjs().add(30, 'minute').format() });
     res.statusCode = result.statusCode;
     res.headers = new Headers(result.headers);
     res.send(result.body);
